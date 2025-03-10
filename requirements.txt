@@ -36,15 +36,6 @@ tiktoken>=0.5.1
 beautifulsoup4>=4.13.4
 docx2txt>=0.9
 
-# Document processing and text analysis (from professor's code)
-#pdfplumber==0.10.3
-#markdownify==0.11.6
-#spacy==3.7.2
-#keybert==0.8.4
-#sumy==0.11.0
-#nltk==3.9.1
-#pyyaml==6.0.1
-
 # Vector database
 pinecone>=3.0.0  # Using pinecone package as recommended by Pinecone
 
