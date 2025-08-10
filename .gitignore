@@ -6,6 +6,7 @@ ENV/
 .venv/
 .env
 .history/
+
 # Python bytecode
 __pycache__/
 *.py[cod]
@@ -96,3 +97,4 @@ frontend/Tutor/
 
 # Claude AI assistant files
 CLAUDE.md
+/tutor/common/._utils.py

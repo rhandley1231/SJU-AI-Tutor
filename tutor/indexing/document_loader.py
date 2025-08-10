@@ -162,4 +162,9 @@ if __name__ == "__main__":
             )
     except ValueError as e:
         print(f"Configuration Error: {e}")
+<<<<<<< HEAD
     except Exception as e:
+=======
+    except Exception as e:
+        print(f"A critical error occurred during execution: {e}")
+>>>>>>> d3c1455 (Created my own branch.)

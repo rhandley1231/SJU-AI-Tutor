@@ -5,7 +5,10 @@ import DiagnosticViewPage from './components/DiagnosticViewPage/DiagnosticViewPa
 import ChapterList from './components/ChapterList';
 import ChapterQuiz from './components/ChapterQuiz';
 import AuthPage from './components/AuthPage';
+<<<<<<< HEAD
 import SurveyPage from './components/SurveyPage';
+=======
+>>>>>>> d3c1455 (Created my own branch.)
 import authService from './services/authService';
 import './App.css';
 
@@ -34,6 +37,7 @@ import './App.css';
  */
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+<<<<<<< HEAD
   const [needsSurvey, setNeedsSurvey] = useState<boolean>(false);
 
   // Check authentication status and survey completion on app load
@@ -49,6 +53,23 @@ function App() {
         setNeedsSurvey(!hasSurveyData);
       } else {
         setNeedsSurvey(false);
+=======
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+
+  // Check authentication status on app load
+  useEffect(() => {
+    const checkAuth = () => {
+      const isLoggedIn = authService.isAuthenticated();
+      const email = sessionStorage.getItem('userEmail'); // Retrieve the email from session
+
+      setIsAuthenticated(isLoggedIn);
+      // Set the user email if available
+      if (isLoggedIn && email) {
+        setUserEmail(email);
+      } else {
+        setUserEmail(null);
+>>>>>>> d3c1455 (Created my own branch.)
       }
     };
     
@@ -62,6 +83,7 @@ function App() {
     };
   }, []);
   
+<<<<<<< HEAD
   const handleAuthSuccess = (isSignup: boolean = false) => {
     setIsAuthenticated(true);
     
@@ -84,6 +106,21 @@ function App() {
     authService.signout();
     setIsAuthenticated(false);
     setNeedsSurvey(false);
+=======
+  const handleAuthSuccess = () => {
+    setIsAuthenticated(true);
+
+    // Retrieve and set email after login
+    const email = sessionStorage.getItem('userEmail');
+    setUserEmail(email || null);
+  };
+  
+  const handleLogout = () => {
+    authService.signout(); // Call the auth service to handle the logout on the backend
+    sessionStorage.removeItem('userEmail'); // Remove email from session storage
+    setIsAuthenticated(false);
+    setUserEmail(null); // Clear the email from state
+>>>>>>> d3c1455 (Created my own branch.)
   };
 
   return (
@@ -95,6 +132,10 @@ function App() {
             <div className="header-left"></div>
             <div className="header-center">CIRO AI Tutor</div>
             <div className="header-right">
+<<<<<<< HEAD
+=======
+              {userEmail && <span className="user-email">Logged in as: {userEmail}</span>}
+>>>>>>> d3c1455 (Created my own branch.)
               <button className="logout-button" onClick={handleLogout}>
                 Log Out
               </button>
@@ -108,6 +149,7 @@ function App() {
             {/* Auth routes - accessible when not authenticated */}
             <Route
               path="/login"
+<<<<<<< HEAD
               element={isAuthenticated ? (needsSurvey ? <Navigate to="/survey" /> : <Navigate to="/" />) : <AuthPage onAuthSuccess={handleAuthSuccess} />}
             />
             
@@ -125,28 +167,46 @@ function App() {
                   ? (needsSurvey ? <Navigate to="/survey" /> : <ChatViewPage />) 
                   : <Navigate to="/login" />
               }
+=======
+              element={isAuthenticated ? <Navigate to="/" /> : <AuthPage onAuthSuccess={handleAuthSuccess} />}
+            />
+            
+            {/* Protected routes - redirect to login if not authenticated */}
+            <Route
+              path="/"
+              element={isAuthenticated ? <ChatViewPage /> : <Navigate to="/login" />}
+>>>>>>> d3c1455 (Created my own branch.)
             />
             
             <Route
               path="/diagnostics"
+<<<<<<< HEAD
               element={
                 isAuthenticated 
                   ? (needsSurvey ? <Navigate to="/survey" /> : <DiagnosticViewPage />) 
                   : <Navigate to="/login" />
               }
+=======
+              element={isAuthenticated ? <DiagnosticViewPage /> : <Navigate to="/login" />}
+>>>>>>> d3c1455 (Created my own branch.)
             />
             
             <Route
               path="/diagnostics/chapters"
+<<<<<<< HEAD
               element={
                 isAuthenticated 
                   ? (needsSurvey ? <Navigate to="/survey" /> : <ChapterList />) 
                   : <Navigate to="/login" />
               }
+=======
+              element={isAuthenticated ? <ChapterList /> : <Navigate to="/login" />}
+>>>>>>> d3c1455 (Created my own branch.)
             />
             
             <Route
               path="/diagnostics/quiz/:chapterId"
+<<<<<<< HEAD
               element={
                 isAuthenticated 
                   ? (needsSurvey ? <Navigate to="/survey" /> : <ChapterQuiz />) 
@@ -156,6 +216,13 @@ function App() {
             
             {/* Default redirect */}
             <Route path="*" element={<Navigate to={isAuthenticated ? (needsSurvey ? "/survey" : "/") : "/login"} />} />
+=======
+              element={isAuthenticated ? <ChapterQuiz /> : <Navigate to="/login" />}
+            />
+            
+            {/* Default redirect */}
+            <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} />} />
+>>>>>>> d3c1455 (Created my own branch.)
           </Routes>
         </div>
       </div>

@@ -1,4 +1,3 @@
-// import apiClient from './apiClient';
 import { ApiResponse } from '../types/api';
 import { SignupFormData, SigninFormData, AuthResponse, UserProfile } from '../types/auth';
 
@@ -37,7 +36,7 @@ export class AuthService {
       ? `${this.CORS_PROXY}${this.SURVEY_ENDPOINT_PROD}`
       : this.SURVEY_ENDPOINT_PROD;
   }
-  
+
   /**
    * Register a new user
    * 
