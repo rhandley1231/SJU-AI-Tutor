@@ -22,11 +22,12 @@ import aiosqlite
 class CiroTutor:
     _app = None
 
-    def __init__(self, email: str):
+    def __init__(self, email: str, user_profile: dict = None):
         summarizer_config = {"max_turns": 20} #<TODO: Maybe we can pass the config as a parameter>
         self.summarizer = ConversationSummarizer(**summarizer_config)
         self.thread_id = email
         self.email = email
+        self.user_profile = user_profile or {}
 
     @classmethod
     async def init_graph(cls):
@@ -83,15 +84,42 @@ class CiroTutor:
 
         if not current_state:
             print(f"Initializing new state for {self.thread_id}")
-            current_state = {
-                "student_profile": {
-                    "email": self.email,
-                    "academic_goals": ["Pass LST 1000X EDGE and declare my major."],
-                    "academic_progress": [],
-                    "knowledge_checker": [],
-                    "emotional_state": [],
-                    "last_check_in_time": datetime.now().isoformat(),
+            
+            # Build comprehensive student profile from user data
+            first_name = self.user_profile.get("firstName", "")
+            last_name = self.user_profile.get("lastName", "")
+            full_name = f"{first_name} {last_name}".strip()
+            
+            student_profile = {
+                "email": self.email,
+                "schoolEmail": self.user_profile.get("schoolEmail", self.email),
+                "firstName": first_name,
+                "lastName": last_name,
+                "fullName": full_name or "Student",  # Fallback to "Student" if no name
+                "sub": self.user_profile.get("sub", self.email),
+                "academic_goals": ["Pass LST 1000X EDGE and declare my major."],
+                "academic_progress": [],
+                "knowledge_checker": [],
+                "emotional_state": [],
+                "last_check_in_time": datetime.now().isoformat(),
+                # Add chapter scores to profile for agents to reference
+                "chapter_scores": {
+                    "chapter1": self.user_profile.get("chapter1score", 0),
+                    "chapter2": self.user_profile.get("chapter2score", 0),
+                    "chapter3": self.user_profile.get("chapter3score", 0),
+                    "chapter4": self.user_profile.get("chapter4score", 0),
+                    "chapter5": self.user_profile.get("chapter5score", 0),
+                    "chapter6": self.user_profile.get("chapter6score", 0),
+                    "chapter7": self.user_profile.get("chapter7score", 0),
+                    "chapter8": self.user_profile.get("chapter8score", 0),
+                    "chapter9": self.user_profile.get("chapter9score", 0),
+                    "chapter10": self.user_profile.get("chapter10score", 0),
                 },
+                "preferences": self.user_profile.get("preferences", {})
+            }
+            
+            current_state = {
+                "student_profile": student_profile,
                 "messages": [],
                 "routing_history": [],
                 "current_depth": 0,
@@ -200,8 +228,14 @@ async def main():
     # Step 1: Compile and cache the graph once
     await CiroTutor.init_graph()
 
-    # Step 2: Create a tutor instance with a test thread ID
-    tutor = CiroTutor(thread_id)
+    # Step 2: Create a tutor instance with a test thread ID and demo profile
+    demo_profile = {
+        "firstName": "Demo",
+        "lastName": "Student",
+        "email": thread_id,
+        "sub": thread_id
+    }
+    tutor = CiroTutor(thread_id, demo_profile)
 
     # Step 3: Launch console session
     await tutor.run_session()

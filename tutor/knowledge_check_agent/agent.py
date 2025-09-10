@@ -108,7 +108,7 @@ def generate_questions(chapter_id: str, num_questions: int = 10) -> List[Dict[st
     try:
         # Generate questions using OpenAI
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-5",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
@@ -239,7 +239,7 @@ def evaluate_text_response(
     try:
         # Generate evaluation using OpenAI
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-5",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}

@@ -17,6 +17,8 @@ import os
 
 # updated Tutor Agent
 from tutor.graph.workflows.ciro import CiroTutor
+# User profile service
+from tutor.services.user_profile_service import get_full_user_profile
 
 # Create the Flask application
 app = Quart(__name__)
@@ -62,7 +64,16 @@ async def chat():
     }
     """
     data = await request.get_json()
-    tutor = CiroTutor(data.get("email")) #The email will be our main ID
+    user_email = data.get("email")
+    
+    if not user_email:
+        return jsonify({"error": "Email is required"}), 400
+    
+    # Fetch complete user profile from DynamoDB
+    user_profile = get_full_user_profile(user_email)
+    
+    # Create tutor with user profile information
+    tutor = CiroTutor(user_email, user_profile)
     response = await tutor.process_message(data["message"])
     return jsonify({"response": response})
 
