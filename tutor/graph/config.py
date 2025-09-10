@@ -4,7 +4,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from tutor.graph.functions.tools import retrieve_course_material_tool, google_search_tool, google_sju_search_tool, google_career_search_tool
 
 HISTORY_LENGTH = 10
-CHAT_MODEL = "gpt-4o"
+CHAT_MODEL = "gpt-5"
 TEMPERATURE = 0.5
 MAX_TURNS = 200 # Length of the message list in Ciro's memory before summarizing
 
