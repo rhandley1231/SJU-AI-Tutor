@@ -38,8 +38,11 @@ export class ChatService {
     };
     
     try {
+      // Get the API base URL from environment or use current origin
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
+      
       // Make the API call to the Flask backend
-      const response = await fetch('http://localhost:5001/api/chat', {
+      const response = await fetch(`${apiBaseUrl}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,8 +96,11 @@ export class ChatService {
    */
   async getConversations(): Promise<Conversation[]> {
     try {
+      // Get the API base URL from environment or use current origin
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
+      
       // Make API call to the sessions endpoint
-      const response = await fetch('http://localhost:5001/api/sessions');
+      const response = await fetch(`${apiBaseUrl}/api/sessions`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch conversations');
@@ -126,8 +132,11 @@ export class ChatService {
    */
   async getConversation(id: string): Promise<Conversation | null> {
     try {
+      // Get the API base URL from environment or use current origin
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
+      
       // Make API call to get the specific session
-      const response = await fetch(`http://localhost:5001/api/sessions/${id}`);
+      const response = await fetch(`${apiBaseUrl}/api/sessions/${id}`);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch conversation ${id}`);

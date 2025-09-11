@@ -21,9 +21,17 @@ from tutor.graph.workflows.ciro import CiroTutor
 # Create the Flask application
 app = Quart(__name__)
 
-# Configure CORS properly for development
-# This allows requests from any origin with any headers and methods
-app=cors(app, allow_origin="*", allow_headers="*", expose_headers="*" )
+# Configure CORS properly for development and production
+# Allow requests from the EC2 instance and localhost for development
+allowed_origins = [
+    "http://localhost:3000",  # Local development
+    "http://localhost:5173",  # Vite dev server
+    "http://ec2-3-16-130-209.us-east-2.compute.amazonaws.com",  # EC2 instance
+    "http://ec2-3-16-130-209.us-east-2.compute.amazonaws.com:3000",  # EC2 with port
+    "https://ec2-3-16-130-209.us-east-2.compute.amazonaws.com",  # HTTPS version
+    "https://ec2-3-16-130-209.us-east-2.compute.amazonaws.com:3000"  # HTTPS with port
+]
+app=cors(app, allow_origin=allowed_origins, allow_headers="*", expose_headers="*", allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 # In-memory storage for conversation sessions
 # In production, this would be replaced with a database
