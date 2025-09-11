@@ -15,7 +15,79 @@ import {
  */
 export class ChatService {
   /**
-   * Send a message to the AI tutor and get a response
+   * Send a message to the AI tutor and get a streaming response
+   * 
+   * This method handles:
+   * 1. Formatting the user's message
+   * 2. Sending it to the backend
+   * 3. Receiving and processing the AI response as a stream
+   * 
+   * @param text - The user's message text
+   * @param sessionId - Optional ID of an existing conversation
+   * @param onToken - Callback for each token received
+   * @param onComplete - Callback when streaming is complete
+   * @param onError - Callback for errors
+   */
+  async sendMessageStream(
+    text: string, 
+    sessionId: string | undefined,
+    onToken: (token: string) => void,
+    onComplete: (fullResponse: string) => void,
+    onError: (error: string) => void
+  ): Promise<void> {
+    const userEmail = sessionStorage.getItem('userEmail');
+
+    const request = {
+      message: text,
+      session_id: sessionId,
+      email: userEmail
+    };
+    
+    try {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
+      
+      const response = await fetch(`${apiBaseUrl}/api/chat/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/plain',
+        },
+        body: JSON.stringify(request)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      
+      if (!reader) {
+        throw new Error('No response body');
+      }
+      
+      let fullResponse = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+        
+        const chunk = decoder.decode(value, { stream: true });
+        fullResponse += chunk;
+        onToken(chunk);
+      }
+      
+      onComplete(fullResponse);
+      
+    } catch (error) {
+      console.error('Streaming error:', error);
+      onError(error instanceof Error ? error.message : 'Unknown error');
+    }
+  }
+
+  /**
+   * Send a message to the AI tutor and get a response (non-streaming)
    * 
    * This method handles:
    * 1. Formatting the user's message

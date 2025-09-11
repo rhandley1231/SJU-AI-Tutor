@@ -452,67 +452,69 @@ ${evaluation.feedback}
                                    inputValue.toLowerCase().includes('test my understanding') || 
                                    inputValue.toLowerCase().includes('evaluate my knowledge');
     
+    // Create a placeholder bot message for streaming
+    const botMessageId = uuidv4();
+    const botMessage: Message = {
+      id: botMessageId,
+      text: '',
+      sender: 'bot',
+      timestamp: new Date(),
+      metadata: { streaming: true }
+    };
+    
+    setMessages(prev => [...prev, botMessage]);
+    
     try {
-      // Send message to the backend and await response
-      const botResponse = await chatService.sendMessage(inputValue, sessionId);
-      
-      // If this is the first message, store the session ID
-      if (!sessionId && botResponse.metadata?.sessionId) {
-        setSessionId(botResponse.metadata.sessionId);
-      }
-      
-      // Add the response to the chat
-      const botMessageBase: Message = {
-        id: botResponse.id || uuidv4(),
-        text: botResponse.text,
-        sender: 'bot',
-        timestamp: new Date(),
-        metadata: botResponse.metadata
-      };
-      
-      // If this was a knowledge check request, we can simulate a free-response question
-      if (isKnowledgeCheckRequest) {
-        // For demo purposes, we'll hardcode a topic and prompt
-        const topic = 'Data Structures';
-        const prompt = 'Please explain how a hash table works and its applications in computer science.';
-        
-        // First send a regular response
-        setMessages(prev => [...prev, botMessageBase]);
-        
-        // Then after a short delay, send a knowledge check question
-        setTimeout(() => {
-          const knowledgeCheckMessage: Message = {
-            id: uuidv4(),
-            text: '',
-            sender: 'bot',
-            timestamp: new Date(),
-            metadata: {
-              knowledgeCheck: {
-                type: 'free-response',
-                topic,
-                prompt,
-                awaitingResponse: true
-              }
-            }
-          };
-          
-          setMessages(prev => [...prev, knowledgeCheckMessage]);
-        }, 1000);
-      } else {
-        // Normal message flow
-        setMessages(prev => [...prev, botMessageBase]);
-      }
+      // Use streaming to get the response
+      await chatService.sendMessageStream(
+        inputValue,
+        sessionId,
+        // onToken callback - add each token as it arrives
+        (token: string) => {
+          setMessages(prev => prev.map(msg => 
+            msg.id === botMessageId 
+              ? { ...msg, text: msg.text + token }
+              : msg
+          ));
+        },
+        // onComplete callback - finalize the message
+        (fullResponse: string) => {
+          setMessages(prev => prev.map(msg => 
+            msg.id === botMessageId 
+              ? { 
+                  ...msg, 
+                  text: fullResponse,
+                  metadata: { ...msg.metadata, streaming: false }
+                }
+              : msg
+          ));
+          setIsTyping(false);
+        },
+        // onError callback
+        (error: string) => {
+          setMessages(prev => prev.map(msg => 
+            msg.id === botMessageId 
+              ? { 
+                  ...msg, 
+                  text: `Sorry, I encountered an error: ${error}`,
+                  metadata: { ...msg.metadata, streaming: false, error: true }
+                }
+              : msg
+          ));
+          setIsTyping(false);
+        }
+      );
     } catch (error) {
-      console.error('Failed to get response:', error);
-      
-      // Show error message
-      setMessages(prev => [...prev, {
-        id: uuidv4(),
-        text: "Sorry, I encountered an error. Please try again.",
-        sender: 'bot',
-        timestamp: new Date()
-      }]);
-    } finally {
+      console.error('Failed to send message:', error);
+      setMessages(prev => prev.map(msg => 
+        msg.id === botMessageId 
+          ? { 
+              ...msg, 
+              text: 'Sorry, I encountered an error. Please try again.',
+              metadata: { ...msg.metadata, streaming: false, error: true }
+            }
+          : msg
+      ));
       setIsTyping(false);
     }
   };

@@ -9,11 +9,12 @@ Usage:
     python app.py
 """
 
-from quart import Quart, request, jsonify
+from quart import Quart, request, jsonify, Response
 from quart_cors import cors
 import uuid
 import asyncio
 import os
+from langchain_core.messages import HumanMessage
 
 # updated Tutor Agent
 from tutor.graph.workflows.ciro import CiroTutor
@@ -73,6 +74,51 @@ async def chat():
     tutor = CiroTutor(data.get("email")) #The email will be our main ID
     response = await tutor.process_message(data["message"])
     return jsonify({"response": response})
+
+
+@app.route('/api/chat/stream', methods=['POST'])
+async def chat_stream():
+    """
+    Streaming chat endpoint that processes messages through the orchestrator.
+    
+    Expected request body:
+    {
+        "message": "User's message text",
+        "session_id": "Optional session ID",
+        "email": "User email"
+    }
+    
+    Returns:
+    Streaming response with tokens as they are generated
+    """
+    data = await request.get_json()
+    
+    async def generate():
+        try:
+            tutor = CiroTutor(data.get("email"))
+            
+            # Prepare the input for streaming
+            inputs = {"new_message": HumanMessage(content=data["message"])}
+            config = {"configurable": {"thread_id": data.get("session_id", "default")}}
+            
+            # Stream the response
+            async for event in tutor._app.astream_events(inputs, config=config, version="v1", stream_mode="values"):
+                if event.get("event") == "on_chat_model_stream":
+                    token = event["data"]["chunk"].content
+                    yield token  # Stream each token directly
+                    
+        except Exception as e:
+            yield f"Error: {str(e)}"
+    
+    return Response(
+        generate(),
+        mimetype='text/plain',
+        headers={
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no',
+            'Transfer-Encoding': 'chunked'
+        }
+    )
 
 
 @app.route('/api/sessions/<session_id>', methods=['GET'])
