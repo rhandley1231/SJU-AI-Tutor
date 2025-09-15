@@ -134,7 +134,7 @@ const ChapterQuiz: React.FC = () => {
         userId,
         chapterId,
         selectedAnswers,
-        questions
+        questions.map((q, index) => ({ id: `q${index}`, question: q.question, options: q.options }))
       );
       
       setQuizResults(results);
@@ -236,10 +236,10 @@ const ChapterQuiz: React.FC = () => {
           {quizResults.bestScores && (
             <div>
               <p>
-                Your best score for this chapter: {quizResults.bestScores[chapterId]?.toFixed(0) || 'N/A'}%
+                Your best score for this chapter: {chapterId ? quizResults.bestScores[chapterId]?.toFixed(0) || 'N/A' : 'N/A'}%
               </p>
               <p>
-                Total attempts: {quizResults.attemptCounts?.[chapterId] || 0}
+                Total attempts: {chapterId ? quizResults.attemptCounts?.[chapterId] || 0 : 0}
               </p>
             </div>
           )}

@@ -142,12 +142,11 @@ const DiagnosticView: React.FC = () => {
       <div className="diagnostic-body">
         {/* Student Profile Card */}
         <div className="card profile-card">
-          <h2>{userProfile?.name || 'Student'}</h2>
-          <div>{userProfile?.school || 'School'}</div>
-          <div>Credit Hours: {userProfile?.creditHours || 0}</div>
-          <div>X Number: {userProfile?.xNumber?.substring(0, 4)}...</div>
+          <h2>{userProfile ? `${userProfile.firstName} ${userProfile.lastName}` : 'Student'}</h2>
+          <div>{userProfile?.schoolEmail || 'No email'}</div>
+          <div>User ID: {userProfile?.sub || 'N/A'}</div>
           <div>
-            <a href={`mailto:${userProfile?.email}`}>{userProfile?.email}</a>
+            <a href={`mailto:${userProfile?.schoolEmail}`}>{userProfile?.schoolEmail}</a>
           </div>
         </div>
 

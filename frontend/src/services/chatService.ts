@@ -44,7 +44,7 @@ export class ChatService {
     };
     
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}`;
       
       const response = await fetch(`${apiBaseUrl}/api/chat/stream`, {
         method: 'POST',
@@ -111,7 +111,7 @@ export class ChatService {
     
     try {
       // Get the API base URL from environment or use current origin
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}`;
       
       // Make the API call to the Flask backend
       const response = await fetch(`${apiBaseUrl}/api/chat`, {
@@ -169,7 +169,7 @@ export class ChatService {
   async getConversations(): Promise<Conversation[]> {
     try {
       // Get the API base URL from environment or use current origin
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}`;
       
       // Make API call to the sessions endpoint
       const response = await fetch(`${apiBaseUrl}/api/sessions`);
@@ -205,7 +205,7 @@ export class ChatService {
   async getConversation(id: string): Promise<Conversation | null> {
     try {
       // Get the API base URL from environment or use current origin
-      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || `${window.location.protocol}//${window.location.hostname}`;
       
       // Make API call to get the specific session
       const response = await fetch(`${apiBaseUrl}/api/sessions/${id}`);

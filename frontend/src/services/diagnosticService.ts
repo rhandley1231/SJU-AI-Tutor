@@ -60,13 +60,10 @@ export class DiagnosticsService {
     try {
       // Mock data - replace with actual API call
       return {
-        id: '123',
-        name: 'Jane Doe',
-        email: 'jane.doe25@stjohns.edu',
-        school: 'Tobin School of Business',
-        creditHours: 10,
-        xNumber: 'X######',
-        role: 'student'
+        sub: '123',
+        schoolEmail: 'jane.doe25@stjohns.edu',
+        firstName: 'Jane',
+        lastName: 'Doe'
       };
     } catch (error) {
       console.error('Failed to fetch user profile', error);

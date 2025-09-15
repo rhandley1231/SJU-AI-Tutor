@@ -7,12 +7,12 @@
  */
 
 /**
- * User Profile Type
+ * Student Profile Type
  * 
  * Represents information about the student using the system.
  * Used for personalization and tracking.
  */
-export interface UserProfile {
+export interface StudentProfile {
   /** Unique identifier for the user */
   id: string;
   /** User's full name */
@@ -292,7 +292,7 @@ export interface Resource {
  */
 export interface DiagnosticsState {
   /** User profile data */
-  userProfile: UserProfile | null;
+  userProfile: StudentProfile | null;
   /** Academic progress metrics */
   progress: ProgressMetrics | null;
   /** Task and assignment list */

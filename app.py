@@ -9,12 +9,11 @@ Usage:
     python app.py
 """
 
-from quart import Quart, request, jsonify, Response
+from quart import Quart, request, jsonify
 from quart_cors import cors
 import uuid
 import asyncio
 import os
-from langchain_core.messages import HumanMessage
 
 # updated Tutor Agent
 from tutor.graph.workflows.ciro import CiroTutor
@@ -22,17 +21,40 @@ from tutor.graph.workflows.ciro import CiroTutor
 # Create the Flask application
 app = Quart(__name__)
 
-# Configure CORS properly for development and production
-# Allow requests from the EC2 instance and localhost for development
-allowed_origins = [
-    "http://localhost:3000",  # Local development
-    "http://localhost:5173",  # Vite dev server
-    "http://ec2-3-16-130-209.us-east-2.compute.amazonaws.com",  # EC2 instance
-    "http://ec2-3-16-130-209.us-east-2.compute.amazonaws.com:3000",  # EC2 with port
-    "https://ec2-3-16-130-209.us-east-2.compute.amazonaws.com",  # HTTPS version
-    "https://ec2-3-16-130-209.us-east-2.compute.amazonaws.com:3000"  # HTTPS with port
-]
-app=cors(app, allow_origin=allowed_origins, allow_headers="*", expose_headers="*", allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+# Configure CORS properly for development
+# This allows requests from any origin with any headers and methods
+app=cors(app, allow_origin="*", allow_headers="*", expose_headers="*" )
+
+# Serve static files from frontend build
+@app.route('/')
+async def serve_frontend():
+    """Serve the React frontend"""
+    from quart import send_file
+    import os
+    frontend_path = os.path.join(os.path.dirname(__file__), 'frontend', 'dist', 'index.html')
+    if os.path.exists(frontend_path):
+        return await send_file(frontend_path)
+    else:
+        return "Frontend not built. Run 'npm run build' in the frontend directory.", 404
+
+@app.route('/<path:path>')
+async def serve_static(path):
+    """Serve static files from frontend dist"""
+    from quart import send_file
+    import os
+    
+    # Check if it's a static asset
+    if path.startswith('assets/') or path.endswith(('.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico')):
+        file_path = os.path.join(os.path.dirname(__file__), 'frontend', 'dist', path)
+        if os.path.exists(file_path):
+            return await send_file(file_path)
+    
+    # For all other routes, serve the React app (SPA routing)
+    frontend_path = os.path.join(os.path.dirname(__file__), 'frontend', 'dist', 'index.html')
+    if os.path.exists(frontend_path):
+        return await send_file(frontend_path)
+    else:
+        return "Frontend not built. Run 'npm run build' in the frontend directory.", 404
 
 # In-memory storage for conversation sessions
 # In production, this would be replaced with a database
@@ -76,51 +98,6 @@ async def chat():
     return jsonify({"response": response})
 
 
-@app.route('/api/chat/stream', methods=['POST'])
-async def chat_stream():
-    """
-    Streaming chat endpoint that processes messages through the orchestrator.
-    
-    Expected request body:
-    {
-        "message": "User's message text",
-        "session_id": "Optional session ID",
-        "email": "User email"
-    }
-    
-    Returns:
-    Streaming response with tokens as they are generated
-    """
-    data = await request.get_json()
-    
-    async def generate():
-        try:
-            tutor = CiroTutor(data.get("email"))
-            
-            # Prepare the input for streaming
-            inputs = {"new_message": HumanMessage(content=data["message"])}
-            config = {"configurable": {"thread_id": data.get("session_id", "default")}}
-            
-            # Stream the response
-            async for event in tutor._app.astream_events(inputs, config=config, version="v1", stream_mode="values"):
-                if event.get("event") == "on_chat_model_stream":
-                    token = event["data"]["chunk"].content
-                    yield token  # Stream each token directly
-                    
-        except Exception as e:
-            yield f"Error: {str(e)}"
-    
-    return Response(
-        generate(),
-        mimetype='text/plain',
-        headers={
-            'Cache-Control': 'no-cache',
-            'X-Accel-Buffering': 'no',
-            'Transfer-Encoding': 'chunked'
-        }
-    )
-
-
 @app.route('/api/sessions/<session_id>', methods=['GET'])
 def get_session(session_id):
     """(Stub) Return session history metadata — can be expanded later."""
@@ -143,4 +120,6 @@ if __name__ == '__main__':
         print(f"{methods} {rule}")
   
     # Run the server
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    # Beanstalk uses PORT environment variable, fallback to 5001 for local development
+    PORT = int(os.environ.get('PORT', 5001))
+    app.run(host='0.0.0.0', port=PORT, debug=False)

@@ -11,7 +11,7 @@ interface KnowledgeCheckProps {
   onClose?: () => void;
 }
 
-const KnowledgeCheck: React.FC<KnowledgeCheckProps> = ({ onClose }) => {
+const KnowledgeCheck: React.FC<KnowledgeCheckProps> = ({ onClose: _onClose }) => {
   // Active view (chapter selection, quiz, or results)
   const [view, setView] = useState<'chapters' | 'quiz' | 'results'>('chapters');
   
@@ -25,7 +25,7 @@ const KnowledgeCheck: React.FC<KnowledgeCheckProps> = ({ onClose }) => {
   const [questions, setQuestions] = useState<FrontendQuizQuestion[]>([]);
   
   // Quiz questions with correct answers (only available after submission)
-  const [completeQuestions, setCompleteQuestions] = useState<QuizQuestion[]>([]);
+  // const [completeQuestions, setCompleteQuestions] = useState<QuizQuestion[]>([]);
   
   // Current question index
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -187,7 +187,7 @@ const KnowledgeCheck: React.FC<KnowledgeCheckProps> = ({ onClose }) => {
       
       // Now that the quiz is scored, we can safely store the complete questions with answers
       if (results.questions) {
-        setCompleteQuestions(results.questions);
+        // setCompleteQuestions(results.questions);
       }
       
       setQuizResults(results);

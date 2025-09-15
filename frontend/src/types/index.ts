@@ -18,4 +18,4 @@ export * from './chat';
 export * from './diagnostics';
 
 // Authentication and user related types
-export * from './auth';
+export type { UserProfile, AuthResponse, SignupFormData, SigninFormData } from './auth';

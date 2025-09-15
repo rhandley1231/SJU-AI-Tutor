@@ -1,0 +1,73 @@
+# Elastic Beanstalk ignore file
+# Exclude files that shouldn't be deployed
+
+# Virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test files
+tests/
+test_*.py
+*_test.py
+
+# Documentation
+README.md
+*.md
+
+# Git
+.git/
+.gitignore
+
+# Docker
+docker/
+Dockerfile*
+
+# AWS setup files
+aws-setup/
+aws/
+
+# Scripts
+scripts/
+
+# Frontend source files (keep built files)
+frontend/node_modules/
+frontend/src/
+frontend/public/
+frontend/package.json
+frontend/package-lock.json
+frontend/vite.config.ts
+frontend/tsconfig.json
+frontend/tsconfig.app.json
+frontend/tsconfig.node.json
+frontend/eslint.config.js
+frontend/index.html
+frontend/README.md
+
+# Temporary files
+*.tmp
+*.temp

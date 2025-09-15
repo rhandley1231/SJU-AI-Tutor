@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect, ReactNode } from 'react';
+import React, { useState, useRef, useEffect, ReactNode } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import './ChatView.css';
 import chatService from '../../services/chatService';
 import diagnosticService from '../../services/diagnosticService';
-import { Message, TextEvaluation } from '../../types';
+import { Message } from '../../types';
 
 /**
  * ChatView Component
@@ -33,7 +33,7 @@ const ChatView: React.FC = () => {
   const [isTyping, setIsTyping] = useState<boolean>(false);
   
   // State to store the current session ID
-  const [sessionId, setSessionId] = useState<string>('');
+  const [sessionId] = useState<string>('');
   
   // State to track if we are currently working on a knowledge check
   const [activeKnowledgeCheck, setActiveKnowledgeCheck] = useState<{
@@ -108,65 +108,65 @@ const ChatView: React.FC = () => {
    * @param text - The text containing source links to format
    * @returns Formatted source links
    */
-  const formatSourceLinks = (text: string): ReactNode[] => {
-    // Regular expression to find source links
-    // Matches [Source: https://...] or similar patterns
-    const sourcePattern = /\[(Source|Source \d+):\s*(https?:\/\/[^\s\]]+)\]/g;
-    
-    if (!sourcePattern.test(text)) {
-      return [text];
-    }
-    
-    const parts = [];
-    let lastIndex = 0;
-    let match;
-    const regex = new RegExp(sourcePattern);
-    
-    // Reset regex
-    regex.lastIndex = 0;
-    
-    // Find all matches
-    while ((match = regex.exec(text)) !== null) {
-      // Add text before the match
-      if (match.index > lastIndex) {
-        parts.push(text.substring(lastIndex, match.index));
-      }
-      
-      const sourceLabel = match[1];
-      const sourceUrl = match[2];
-      
-      // Extract domain for displaying a cleaner link text
-      let displayUrl = sourceUrl;
-      try {
-        const url = new URL(sourceUrl);
-        displayUrl = url.hostname.replace('www.', '');
-      } catch (e) {
-        // Use the full URL if parsing fails
-      }
-      
-      // Add the formatted link
-      parts.push(
-        <a 
-          key={`source-${match.index}`}
-          href={sourceUrl}
-          className="source-link"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {`[${sourceLabel}: ${displayUrl}]`}
-        </a>
-      );
-      
-      lastIndex = regex.lastIndex;
-    }
-    
-    // Add any remaining text
-    if (lastIndex < text.length) {
-      parts.push(text.substring(lastIndex));
-    }
-    
-    return parts;
-  };
+  // const formatSourceLinks = (text: string): ReactNode[] => {
+  //   // Regular expression to find source links
+  //   // Matches [Source: https://...] or similar patterns
+  //   const sourcePattern = /\[(Source|Source \d+):\s*(https?:\/\/[^\s\]]+)\]/g;
+  //   
+  //   if (!sourcePattern.test(text)) {
+  //     return [text];
+  //   }
+  //   
+  //   const parts = [];
+  //   let lastIndex = 0;
+  //   let match;
+  //   const regex = new RegExp(sourcePattern);
+  //   
+  //   // Reset regex
+  //   regex.lastIndex = 0;
+  //   
+  //   // Find all matches
+  //   while ((match = regex.exec(text)) !== null) {
+  //     // Add text before the match
+  //     if (match.index > lastIndex) {
+  //       parts.push(text.substring(lastIndex, match.index));
+  //     }
+  //     
+  //     const sourceLabel = match[1];
+  //     const sourceUrl = match[2];
+  //     
+  //     // Extract domain for displaying a cleaner link text
+  //     let displayUrl = sourceUrl;
+  //     try {
+  //       const url = new URL(sourceUrl);
+  //       displayUrl = url.hostname.replace('www.', '');
+  //     } catch (e) {
+  //       // Use the full URL if parsing fails
+  //     }
+  //     
+  //     // Add the formatted link
+  //     parts.push(
+  //       <a 
+  //         key={`source-${match.index}`}
+  //         href={sourceUrl}
+  //         className="source-link"
+  //         target="_blank"
+  //         rel="noopener noreferrer"
+  //       >
+  //         {`[${sourceLabel}: ${displayUrl}]`}
+  //       </a>
+  //     );
+  //     
+  //     lastIndex = regex.lastIndex;
+  //   }
+  //   
+  //   // Add any remaining text
+  //   if (lastIndex < text.length) {
+  //     parts.push(text.substring(lastIndex));
+  //   }
+  //   
+  //   return parts;
+  // };
   
   /**
    * Handles submission of a free-response knowledge check answer
@@ -301,8 +301,8 @@ ${evaluation.feedback}
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        code: ({ inline, ...props }) => (
-                          inline ? <code className="inline-code" {...props} /> : <code className="code-block" {...props} />
+                        code: ({ ...props }) => (
+                          <code className="code-block" {...props} />
                         ),
                       }}
                     >
@@ -349,8 +349,8 @@ ${evaluation.feedback}
                         <ReactMarkdown 
                           remarkPlugins={[remarkGfm]}
                           components={{
-                            code: ({ inline, ...props }) => (
-                              inline ? <code className="inline-code" {...props} /> : <code className="code-block" {...props} />
+                            code: ({ ...props }) => (
+                              <code className="code-block" {...props} />
                             ),
                           }}
                         >
@@ -396,10 +396,8 @@ ${evaluation.feedback}
                 />
               ),
               // Customize code blocks with syntax highlighting class
-              code: ({ inline, ...props }) => (
-                inline 
-                  ? <code className="inline-code" {...props} /> 
-                  : <code className="code-block" {...props} />
+              code: ({ ...props }) => (
+                <code className="code-block" {...props} />
               ),
               // Add custom classes to other elements as needed
               h1: (props) => <h1 className="markdown-h1" {...props} />,
@@ -448,9 +446,9 @@ ${evaluation.feedback}
     setIsTyping(true);
     
     // Check if the message is requesting a knowledge check
-    const isKnowledgeCheckRequest = inputValue.toLowerCase().includes('check my knowledge') || 
-                                   inputValue.toLowerCase().includes('test my understanding') || 
-                                   inputValue.toLowerCase().includes('evaluate my knowledge');
+    // const isKnowledgeCheckRequest = inputValue.toLowerCase().includes('check my knowledge') || 
+    //                                inputValue.toLowerCase().includes('test my understanding') || 
+    //                                inputValue.toLowerCase().includes('evaluate my knowledge');
     
     // Create a placeholder bot message for streaming
     const botMessageId = uuidv4();
@@ -459,7 +457,7 @@ ${evaluation.feedback}
       text: '',
       sender: 'bot',
       timestamp: new Date(),
-      metadata: { streaming: true }
+      metadata: {}
     };
     
     setMessages(prev => [...prev, botMessage]);
